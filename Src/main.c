@@ -30,6 +30,7 @@
 #include "main.h"
 #include "si1132_defs.h"
 #include "string.h"
+#include "bme280_support.c"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
@@ -111,9 +112,18 @@ int main(void)
 
   Si1132_Init((I2C_HandleTypeDef *) &hi2c1);
 
+  /* bme280 init */
+  //I2C_routine();
+
+  /* si1132 variables */
   float visib = 0.0;
   float ir    = 0.0;
   uint16_t uv = 0;
+  /* bme280 variables
+  float temperature = 0.0;
+  float pressure = 0.0;
+  float humidity = 0.0;
+  */
 
   /* USER CODE END 2 */
 
@@ -127,6 +137,8 @@ int main(void)
 	  Si1132_readVisible(&hi2c1, &visib);
 	  Si1132_readIR(&hi2c1, &ir);
 	  uv = Si1132_readUV(&hi2c1);
+
+      bme280_data_readout_template();
 
 	  char outstr[20];
 	  sprintf(outstr, "%3.4f %3.4f %u\n\r", visib, ir, uv);
