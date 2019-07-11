@@ -192,8 +192,8 @@ int main(void)
       press_q24_8 = BME280_CalcP(UP);
       pressure = ((press_q24_8 >> 8) * 1000) + (((press_q24_8 & 0xff) * 390625) / 100000);
 
-	  char outstr[30];
-	  sprintf(outstr, "%3.4f %3.4f %3.4f %3.4f %3.4f %u\n\r", visib, ir, uv, temperature, humidity, pressure);
+	  char outstr[40];
+	  sprintf(outstr, "%3.4f %3.4f %3.4f %i.%02u %u.%03u %u.%03u\n\r", visib, ir, uv, temperature/100, temperature%100, humidity/1000,humidity%1000, pressure/100000, pressure%100000);
 	  HAL_UART_Transmit(&huart2, outstr, strlen(outstr), 10);
 	  HAL_Delay(_LOOP_DELAY_MS_);
   }
