@@ -197,7 +197,7 @@ BME280_RESULT BME280_Read_Calibration(I2C_HandleTypeDef * h_i2c) {
 	// Read humidity calibration data (calib26..calib41)
 	buf[0] = BME280_REG_CALIB26; // calib26 register address
 	if (HAL_I2C_Master_Transmit(h_i2c,BME280_I2C_PORT,&buf[0],1,HAL_MAX_DELAY) != HAL_OK) return BME280_ERROR;
-	if (HAL_I2C_Master_Receive(h_i2c,BME280_I2C_PORT,buf,7,HAL_MAX_DELAY != HAL_OK) return BME280_ERROR;
+	if (HAL_I2C_Master_Receive(h_i2c,BME280_I2C_PORT,buf,7,HAL_MAX_DELAY != HAL_OK)) return BME280_ERROR;
 
 	// Unpack data
 	cal_param.dig_H2 = (int16_t)((((int8_t)buf[1]) << 8) | buf[0]);
