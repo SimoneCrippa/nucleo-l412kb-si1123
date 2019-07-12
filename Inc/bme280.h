@@ -1,7 +1,6 @@
 #ifndef __BME280_H
 #define __BME280_H
 
-#include "stm32l4xx_hal_i2c.h"
 #include "stm32l4xx_hal.h"
 
 // Support high precision calculations using floats
@@ -149,11 +148,11 @@ void BME280_WriteReg(I2C_HandleTypeDef * h_i2c,uint8_t reg, uint8_t value);
 uint8_t BME280_ReadReg(I2C_HandleTypeDef * h_i2c,uint8_t reg);
 
 BME280_RESULT BME280_Check(I2C_HandleTypeDef * h_i2c);
-inline void BME280_Reset(I2C_HandleTypeDef * h_i2c);
+void BME280_Reset(I2C_HandleTypeDef * h_i2c);
 
-inline uint8_t BME280_GetVersion(I2C_HandleTypeDef * h_i2c);
-inline uint8_t BME280_GetStatus(I2C_HandleTypeDef * h_i2c);
-inline uint8_t BME280_GetMode(I2C_HandleTypeDef * h_i2c);
+uint8_t BME280_GetVersion(I2C_HandleTypeDef * h_i2c);
+uint8_t BME280_GetStatus(I2C_HandleTypeDef * h_i2c);
+uint8_t BME280_GetMode(I2C_HandleTypeDef * h_i2c);
 
 void BME280_SetMode(I2C_HandleTypeDef * h_i2c,uint8_t mode);
 void BME280_SetFilter(I2C_HandleTypeDef * h_i2c,uint8_t filter);

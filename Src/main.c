@@ -77,32 +77,60 @@ static void MX_USART2_UART_Init(void);
 
 /* USER CODE END 0 */
 
+void BME280_Init(I2C_HandleTypeDef * h12c1)
+{
+
+	/*Chip start-up time is 2ms, must wait until it becomes accessible
+	  Instead of using delay function, wait while chip loads the NVM data to image register
+	  It loads the NVM data during start-up or before each measurement starts, so
+	  wait until chip becomes accessible through the I2C interface and loads the NVM data*/
+	/*volatile uint32_t i = 0xfff;
+	  while (i-- && !(BME280_GetStatus(&hi2c1) & BME280_STATUS_IM_UPDATE));
+	  if (i == 0) {
+		// Some banana happens (no respond from the chip after reset or NVM bit stuck forever)
+		char outstr0[30];
+		sprintf(outstr0,"BME280 timeout\r\n");
+		while(1);
+	  }
+	  */
+
+	  BME280_Reset(&hi2c1);
+
+	  /* Set normal mode inactive duration (standby time) */
+	  BME280_SetStandby(&hi2c1,BME280_STBY_1s);
+
+	  /* Set IIR filter constant */
+	  BME280_SetFilter(&hi2c1,BME280_FILTER_4);
+
+	  /* Set oversampling for temperature */
+	  BME280_SetOSRST(&hi2c1,BME280_OSRS_T_x4);
+
+	  /* Set oversampling for pressure */
+	  BME280_SetOSRSP(&hi2c1,BME280_OSRS_P_x2);
+
+	  /* Set oversampling for humidity */
+	  BME280_SetOSRSH(&hi2c1,BME280_OSRS_H_x1);
+
+	  /* Set normal mode (perpetual periodic conversion) */
+	  BME280_SetMode(&hi2c1,BME280_MODE_NORMAL);
+
+	  /* Read calibration values */
+	  BME280_Read_Calibration(&hi2c1);
+}
+
 /**
   * @brief  The application entry point.
   * @retval int
   */
 int main(void)
 {
-  /* USER CODE BEGIN 1 */
-
-  /* USER CODE END 1 */
-  
-
   /* MCU Configuration--------------------------------------------------------*/
 
   /* Reset of all peripherals, Initializes the Flash interface and the Systick. */
   HAL_Init();
 
-  /* USER CODE BEGIN Init */
-
-  /* USER CODE END Init */
-
   /* Configure the system clock */
   SystemClock_Config();
-
-  /* USER CODE BEGIN SysInit */
-
-  /* USER CODE END SysInit */
 
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
@@ -110,55 +138,21 @@ int main(void)
   MX_USART2_UART_Init();
   /* USER CODE BEGIN 2 */
 
-
-
-  // Reset the BME280 chip
-  BME280_Reset(&hi2c1);
-
-  // Chip start-up time is 2ms, must wait until it becomes accessible
-  // Instead of using delay function, wait while chip loads the NVM data to image register
-  // It loads the NVM data during start-up or before each measurement starts, so
-  // wait until chip becomes accessible through the I2C interface and loads the NVM data
-  uint32_t i = 0xfff;
-  while (i-- && !(BME280_GetStatus(&hi2c1) & BME280_STATUS_IM_UPDATE));
-  if (i == 0) {
-	// Some banana happens (no respond from the chip after reset or NVM bit stuck forever)
-	char outstr0[30];
-	sprintf(outstr0,"BME280 timeout\r\n");
-	while(1);
-  }
-
-  // Set normal mode inactive duration (standby time)
-  BME280_SetStandby(&hi2c1,BME280_STBY_1s);
-
-  // Set IIR filter constant
-  BME280_SetFilter(&hi2c1,BME280_FILTER_4);
-
-  // Set oversampling for temperature
-  BME280_SetOSRST(&hi2c1,BME280_OSRS_T_x4);
-
-  // Set oversampling for pressure
-  BME280_SetOSRSP(&hi2c1,BME280_OSRS_P_x2);
-
-  // Set oversampling for humidity
-  BME280_SetOSRSH(&hi2c1,BME280_OSRS_H_x1);
-
-  // Set normal mode (perpetual periodic conversion)
-  BME280_SetMode(&hi2c1,BME280_MODE_NORMAL);
-
-  Si1132_Init((I2C_HandleTypeDef *) &hi2c1);
+  /* Si1132 & BME280 initialization */
+  Si1132_Init(&hi2c1);
+  BME280_Init(&hi2c1);
 
   /* bme280 variables */
-  // RAW temperature, pressure and humidity values
+  /* RAW temperature, pressure and humidity values */
   int32_t UT,UP,UH;
 
-  // Pressure in Q24.8 format
+  /* Pressure in Q24.8 format */
   uint32_t press_q24_8;
 
-  // Humidity in Q22.10 format
+  /* Humidity in Q22.10 format */
   uint32_t hum_q22_10;
 
-  // Human-readable temperature, pressure and humidity value
+  /* Human-readable temperature, pressure and humidity value */
   int32_t temperature = 0;
   uint32_t pressure = 0;
   uint32_t humidity = 0;
@@ -168,38 +162,31 @@ int main(void)
   float ir    = 0.0;
   uint16_t uv = 0;
 
-
-  /* USER CODE END 2 */
-
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-    /* USER CODE END WHILE */
-
-    /* USER CODE BEGIN 3 */
-    /* SI1132 code */
+      /* SI1132 readings */
 	  Si1132_readVisible(&hi2c1, &visib);
 	  Si1132_readIR(&hi2c1, &ir);
 	  uv = Si1132_readUV(&hi2c1);
 
+	  /* bme280 readings and computations */
+	  BME280_Read_UTPH(&hi2c1,&UT,&UP,&UH);
 
-    /* bme280 code */
-      i = BME280_Read_UTPH(&hi2c1,&UT,&UP,&UH);
       temperature = BME280_CalcT(UT);
       hum_q22_10 = BME280_CalcH(UH);
       humidity = ((hum_q22_10 >> 10) * 1000) + (((hum_q22_10 & 0x3ff) * 976562) / 1000000);
       press_q24_8 = BME280_CalcP(UP);
       pressure = ((press_q24_8 >> 8) * 1000) + (((press_q24_8 & 0xff) * 390625) / 100000);
 
+      /* write values on UART */
 	  char outstr[40];
-	  sprintf(outstr, "%3.4f %3.4f %3.4f %i.%02u %u.%03u %u.%03u\n\r", visib, ir, uv, temperature/100, temperature%100, humidity/1000,humidity%1000, pressure/100000, pressure%100000);
+	  sprintf(outstr, "%3.4f %3.4f %i %i.%02u %u.%03u %u.%03u\n\r", visib, ir, uv, temperature/100, temperature%100, humidity/1000,humidity%1000, pressure/100000, pressure%100000);
 	  HAL_UART_Transmit(&huart2, outstr, strlen(outstr), 10);
 	  HAL_Delay(_LOOP_DELAY_MS_);
   }
-  /* USER CODE END 3 */
 }
-
 
 /**
   * @brief System Clock Configuration

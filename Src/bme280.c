@@ -52,28 +52,28 @@ BME280_RESULT BME280_Check(I2C_HandleTypeDef * h_i2c) {
 
 // Order BME280 to do a software reset
 // note: after reset the chip will be unaccessible during 3ms
-inline void BME280_Reset(I2C_HandleTypeDef * h_i2c) {
+void BME280_Reset(I2C_HandleTypeDef * h_i2c) {
 	BME280_WriteReg(h_i2c,BME280_REG_RESET,BME280_SOFT_RESET_KEY);
 }
 
 // Get version of the BME280 chip
 // return:
 //   BME280 chip version or zero if no BME280 present on the I2C bus or it was an I2C timeout
-inline uint8_t BME280_GetVersion(I2C_HandleTypeDef * h_i2c) {
+uint8_t BME280_GetVersion(I2C_HandleTypeDef * h_i2c) {
 	return BME280_ReadReg(h_i2c, BME280_REG_ID);
 }
 
 // Get current status of the BME280 chip
 // return:
 //   Status of the BME280 chip or zero if no BME280 present on the I2C bus or it was an I2C timeout
-inline uint8_t BME280_GetStatus(I2C_HandleTypeDef * h_i2c) {
+uint8_t BME280_GetStatus(I2C_HandleTypeDef * h_i2c) {
 	return BME280_ReadReg(h_i2c, BME280_REG_STATUS) & BME280_STATUS_MSK;
 }
 
 // Get current sensor mode of the BME280 chip
 // return:
 //   Sensor mode of the BME280 chip or zero if no BME280 present on the I2C bus or it was an I2C timeout
-inline uint8_t BME280_GetMode(I2C_HandleTypeDef * h_i2c) {
+uint8_t BME280_GetMode(I2C_HandleTypeDef * h_i2c) {
 	return BME280_ReadReg(h_i2c, BME280_REG_CTRL_MEAS) & BME280_MODE_MSK;
 }
 
