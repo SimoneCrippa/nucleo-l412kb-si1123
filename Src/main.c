@@ -182,8 +182,8 @@ int main(void)
       pressure = ((press_q24_8 >> 8) * 1000) + (((press_q24_8 & 0xff) * 390625) / 100000);
 
       /* write values on UART */
-	  char outstr[40];
-	  sprintf(outstr, "%3.4f %3.4f %i %i.%02u %u.%03u %u.%03u\n\r", visib, ir, uv, temperature/100, temperature%100, humidity/1000,humidity%1000, pressure/100000, pressure%100000);
+	  char outstr[29];
+	  sprintf(outstr, "%i,%.2f,%.2f,%i.%02u,%u.%02u,%u.%2u\n\r",uv,(visib*0.0079), (ir*0.0079), temperature/100, temperature%100,pressure/100000, (pressure/1000)%100,humidity/1000,(humidity/10)%100);
 	  HAL_UART_Transmit(&huart2, outstr, strlen(outstr), 10);
 
 	  /* fault detection and reset handling */
