@@ -116,6 +116,7 @@ void BME280_Init(I2C_HandleTypeDef * h12c1)
 
 	  /* Read calibration values */
 	  BME280_Read_Calibration(&hi2c1);
+
 }
 
 /**
@@ -184,15 +185,17 @@ int main(void)
 	  char outstr[40];
 	  sprintf(outstr, "%3.4f %3.4f %i %i.%02u %u.%03u %u.%03u\n\r", visib, ir, uv, temperature/100, temperature%100, humidity/1000,humidity%1000, pressure/100000, pressure%100000);
 	  HAL_UART_Transmit(&huart2, outstr, strlen(outstr), 10);
-	  HAL_Delay(_LOOP_DELAY_MS_);
 
 	  /* fault detection and reset handling */
-	  if((uv >= 12) || (uv < 0)){
-		  while(BME280_Check(&hi2c1) != 0);
-		  //MX_I2C1_Init();
-		  Si1132_Init((I2C_HandleTypeDef *) &hi2c1);
-		  BME280_Init(&hi2c1);
+	  if(HAL_I2C_GetError(&hi2c1) != 0){
+		  while(!BME280_GetStatus(&hi2c1)){
+			  MX_I2C1_Init();
+			  HAL_Delay(_LOOP_DELAY_MS_);
+			  Si1132_Init(&hi2c1);
+			  BME280_Init(&hi2c1);
+		  }
 	  }
+	  HAL_Delay(_LOOP_DELAY_MS_);
   }
 }
 
