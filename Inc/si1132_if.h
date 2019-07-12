@@ -13,7 +13,7 @@
 #include "stm32l4xx_hal.h"
 
 
-void Si1132_Reset(I2C_HandleTypeDef *);
+HAL_StatusTypeDef Si1132_Reset(I2C_HandleTypeDef *);
 
 void Si1132_Init(I2C_HandleTypeDef *);
 

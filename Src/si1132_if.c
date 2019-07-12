@@ -9,7 +9,7 @@
 
 #define SI1132_WAIT_DELAY 10
 
-void Si1132_Reset(I2C_HandleTypeDef * h_i2c)
+HAL_StatusTypeDef Si1132_Reset(I2C_HandleTypeDef * h_i2c)
 {
 	HAL_StatusTypeDef status = HAL_OK;
 
@@ -52,13 +52,14 @@ void Si1132_Reset(I2C_HandleTypeDef * h_i2c)
 	val[1] = 0x17;
 	status = HAL_I2C_Master_Transmit(h_i2c,
 			Si1132_DEVICE_ADDR, (uint8_t *) val, 2, HAL_MAX_DELAY);
+	return status;
 }
 
 void Si1132_Init(I2C_HandleTypeDef * h_i2c)
 {
 	HAL_StatusTypeDef status = HAL_OK;
 
-	Si1132_Reset(h_i2c);
+	while(Si1132_Reset(h_i2c) != HAL_OK);
 
 	uint8_t val[] = { Si1132_REG_UCOEF0, 0x7B};
 	status = HAL_I2C_Master_Transmit(h_i2c,

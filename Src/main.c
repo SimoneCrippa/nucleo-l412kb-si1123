@@ -185,6 +185,14 @@ int main(void)
 	  sprintf(outstr, "%3.4f %3.4f %i %i.%02u %u.%03u %u.%03u\n\r", visib, ir, uv, temperature/100, temperature%100, humidity/1000,humidity%1000, pressure/100000, pressure%100000);
 	  HAL_UART_Transmit(&huart2, outstr, strlen(outstr), 10);
 	  HAL_Delay(_LOOP_DELAY_MS_);
+
+	  /* fault detection and reset handling */
+	  if((uv >= 12) || (uv < 0)){
+		  while(BME280_Check(&hi2c1) != 0);
+		  //MX_I2C1_Init();
+		  Si1132_Init((I2C_HandleTypeDef *) &hi2c1);
+		  BME280_Init(&hi2c1);
+	  }
   }
 }
 
