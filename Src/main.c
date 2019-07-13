@@ -32,92 +32,19 @@
 #include "string.h"
 #include "bme280.h"
 
-/* Private includes ----------------------------------------------------------*/
-/* USER CODE BEGIN Includes */
-
-/* USER CODE END Includes */
-
-/* Private typedef -----------------------------------------------------------*/
-/* USER CODE BEGIN PTD */
-
-/* USER CODE END PTD */
-
-/* Private define ------------------------------------------------------------*/
-/* USER CODE BEGIN PD */
-
 #define _LOOP_DELAY_MS_ 1000
-
-/* USER CODE END PD */
-
-/* Private macro -------------------------------------------------------------*/
-/* USER CODE BEGIN PM */
-
-/* USER CODE END PM */
 
 /* Private variables ---------------------------------------------------------*/
 I2C_HandleTypeDef hi2c1;
 
 UART_HandleTypeDef huart2;
 
-/* USER CODE BEGIN PV */
-
-/* USER CODE END PV */
-
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
 static void MX_I2C1_Init(void);
 static void MX_USART2_UART_Init(void);
-/* USER CODE BEGIN PFP */
-
-/* USER CODE END PFP */
-
-/* Private user code ---------------------------------------------------------*/
-/* USER CODE BEGIN 0 */
-
-/* USER CODE END 0 */
-
-void BME280_Init(I2C_HandleTypeDef * h12c1)
-{
-
-	/*Chip start-up time is 2ms, must wait until it becomes accessible
-	  Instead of using delay function, wait while chip loads the NVM data to image register
-	  It loads the NVM data during start-up or before each measurement starts, so
-	  wait until chip becomes accessible through the I2C interface and loads the NVM data*/
-	/*volatile uint32_t i = 0xfff;
-	  while (i-- && !(BME280_GetStatus(&hi2c1) & BME280_STATUS_IM_UPDATE));
-	  if (i == 0) {
-		// Some banana happens (no respond from the chip after reset or NVM bit stuck forever)
-		char outstr0[30];
-		sprintf(outstr0,"BME280 timeout\r\n");
-		while(1);
-	  }
-	  */
-
-	  BME280_Reset(&hi2c1);
-
-	  /* Set normal mode inactive duration (standby time) */
-	  BME280_SetStandby(&hi2c1,BME280_STBY_1s);
-
-	  /* Set IIR filter constant */
-	  BME280_SetFilter(&hi2c1,BME280_FILTER_4);
-
-	  /* Set oversampling for temperature */
-	  BME280_SetOSRST(&hi2c1,BME280_OSRS_T_x4);
-
-	  /* Set oversampling for pressure */
-	  BME280_SetOSRSP(&hi2c1,BME280_OSRS_P_x2);
-
-	  /* Set oversampling for humidity */
-	  BME280_SetOSRSH(&hi2c1,BME280_OSRS_H_x1);
-
-	  /* Set normal mode (perpetual periodic conversion) */
-	  BME280_SetMode(&hi2c1,BME280_MODE_NORMAL);
-
-	  /* Read calibration values */
-	  BME280_Read_Calibration(&hi2c1);
-
-}
+void BME280_Init(I2C_HandleTypeDef *);
 
 /**
   * @brief  The application entry point.
@@ -165,8 +92,7 @@ int main(void)
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
-  while (1)
-  {
+  while(1){
       /* SI1132 readings */
 	  Si1132_readVisible(&hi2c1, &visib);
 	  Si1132_readIR(&hi2c1, &ir);
@@ -197,6 +123,36 @@ int main(void)
 	  }
 	  HAL_Delay(_LOOP_DELAY_MS_);
   }
+}
+
+/**
+  * @brief Initialization of BME280 sensor
+  * @retval none
+  */
+void BME280_Init(I2C_HandleTypeDef * h12c1)
+{
+  BME280_Reset(&hi2c1);
+
+  /* Set normal mode inactive duration (standby time) */
+  BME280_SetStandby(&hi2c1,BME280_STBY_1s);
+
+  /* Set IIR filter constant */
+  BME280_SetFilter(&hi2c1,BME280_FILTER_4);
+
+  /* Set oversampling for temperature */
+  BME280_SetOSRST(&hi2c1,BME280_OSRS_T_x4);
+
+  /* Set oversampling for pressure */
+  BME280_SetOSRSP(&hi2c1,BME280_OSRS_P_x2);
+
+  /* Set oversampling for humidity */
+  BME280_SetOSRSH(&hi2c1,BME280_OSRS_H_x1);
+
+  /* Set normal mode (perpetual periodic conversion) */
+  BME280_SetMode(&hi2c1,BME280_MODE_NORMAL);
+
+  /* Read calibration values */
+  BME280_Read_Calibration(&hi2c1);
 }
 
 /**
@@ -263,14 +219,6 @@ void SystemClock_Config(void)
   */
 static void MX_I2C1_Init(void)
 {
-
-  /* USER CODE BEGIN I2C1_Init 0 */
-
-  /* USER CODE END I2C1_Init 0 */
-
-  /* USER CODE BEGIN I2C1_Init 1 */
-
-  /* USER CODE END I2C1_Init 1 */
   hi2c1.Instance = I2C1;
   hi2c1.Init.Timing = 0x00707CBB;
   hi2c1.Init.OwnAddress1 = 0;
@@ -280,26 +228,18 @@ static void MX_I2C1_Init(void)
   hi2c1.Init.OwnAddress2Masks = I2C_OA2_NOMASK;
   hi2c1.Init.GeneralCallMode = I2C_GENERALCALL_DISABLE;
   hi2c1.Init.NoStretchMode = I2C_NOSTRETCH_DISABLE;
+
   if (HAL_I2C_Init(&hi2c1) != HAL_OK)
-  {
     Error_Handler();
-  }
+
   /** Configure Analogue filter 
   */
   if (HAL_I2CEx_ConfigAnalogFilter(&hi2c1, I2C_ANALOGFILTER_ENABLE) != HAL_OK)
-  {
     Error_Handler();
-  }
   /** Configure Digital filter 
   */
   if (HAL_I2CEx_ConfigDigitalFilter(&hi2c1, 0) != HAL_OK)
-  {
     Error_Handler();
-  }
-  /* USER CODE BEGIN I2C1_Init 2 */
-
-  /* USER CODE END I2C1_Init 2 */
-
 }
 
 /**
@@ -309,14 +249,6 @@ static void MX_I2C1_Init(void)
   */
 static void MX_USART2_UART_Init(void)
 {
-
-  /* USER CODE BEGIN USART2_Init 0 */
-
-  /* USER CODE END USART2_Init 0 */
-
-  /* USER CODE BEGIN USART2_Init 1 */
-
-  /* USER CODE END USART2_Init 1 */
   huart2.Instance = USART2;
   huart2.Init.BaudRate = 115200;
   huart2.Init.WordLength = UART_WORDLENGTH_8B;
@@ -328,13 +260,7 @@ static void MX_USART2_UART_Init(void)
   huart2.Init.OneBitSampling = UART_ONE_BIT_SAMPLE_DISABLE;
   huart2.AdvancedInit.AdvFeatureInit = UART_ADVFEATURE_NO_INIT;
   if (HAL_RS485Ex_Init(&huart2, UART_DE_POLARITY_HIGH, 0, 0) != HAL_OK)
-  {
     Error_Handler();
-  }
-  /* USER CODE BEGIN USART2_Init 2 */
-
-  /* USER CODE END USART2_Init 2 */
-
 }
 
 /**
@@ -362,10 +288,6 @@ static void MX_GPIO_Init(void)
   HAL_GPIO_Init(LD3_GPIO_Port, &GPIO_InitStruct);
 
 }
-
-/* USER CODE BEGIN 4 */
-
-/* USER CODE END 4 */
 
 /**
   * @brief  This function is executed in case of error occurrence.

@@ -125,7 +125,6 @@ void Si1132_Init(I2C_HandleTypeDef * h_i2c)
 				Si1132_DEVICE_ADDR, (uint8_t *) val, 2, HAL_MAX_DELAY);
 }
 
-
 void Si1132_I2C_writeParam(
 		I2C_HandleTypeDef * h_i2c, uint8_t param, uint8_t value)
 {
@@ -171,7 +170,6 @@ uint16_t Si1132_I2C_read16(
 	return (uint16_t)(rbuf[0] | retval << 8);
 }
 
-
 void Si1132_readVisible(I2C_HandleTypeDef * h_i2c, float * value)
 {
 	uint16_t rval = Si1132_I2C_read16(h_i2c, 0x22);
@@ -188,4 +186,3 @@ uint16_t Si1132_readUV(I2C_HandleTypeDef * h_i2c)
 {
 	return Si1132_I2C_read16(h_i2c, 0x2c);
 }
-

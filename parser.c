@@ -16,7 +16,7 @@ int main(void)
     if (fd == -1)
         printf("open_port: Unable to open /dev/ttyACM0");
 
-    char buffer[30];
+    char buffer[50];
     int n;
     time(&rawtime);
     info = localtime(&rawtime);

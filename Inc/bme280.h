@@ -13,18 +13,8 @@
 //   1 - use 64-bit pressure compensation (more code, more precision)
 #define BME280_USE_INT64                1
 
-
-// BME280 HAL
-#define BME280_I2C_PORT                 ((uint8_t)0x76) << 1 // I2C port where the BME280 connected
-
-// BME280 I2C related
-
-// All possible I2C device address values
-#define BME280_ADDR_G                   (uint8_t)0x76 // I2C address when SDO connected to GND
-#define BME280_ADDR_V                   (uint8_t)0x77 // I2C address when SDO connected to VDDIO
-
 // BME280 address
-#define BME280_ADDR                     (BME280_ADDR_V << 1)
+#define BME280_ADDR                     ((uint8_t)0x76) << 1
 
 // BME280 registers
 #define BME280_REG_CALIB00              (uint8_t)0x88 // Calibration data calib00
@@ -44,8 +34,6 @@
 #define BME280_REG_TEMP_XLSB            (uint8_t)0xFC // Temperature data XLSB
 #define BME280_REG_HUM_MSB              (uint8_t)0xFD // Humidity data MSB
 #define BME280_REG_HUM_LSB              (uint8_t)0xFE // Humidity data LSB
-
-// BME280 register bits
 
 // Software reset
 #define BME280_SOFT_RESET_KEY           (uint8_t)0xB6

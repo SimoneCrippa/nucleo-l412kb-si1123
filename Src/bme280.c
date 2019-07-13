@@ -9,13 +9,10 @@
 //   - calculate pressure in millimeters of mercury
 //   - calculate barometric altitude
 
-
 #include "bme280.h"
-
 
 // Carries fine temperature as global value for pressure and humidity calculation
 static int32_t t_fine;
-
 
 // Write new value to BME280 register
 // input:
@@ -24,7 +21,7 @@ static int32_t t_fine;
 void BME280_WriteReg(I2C_HandleTypeDef * h_i2c, uint8_t reg, uint8_t value) {
 	uint8_t buf[2] = { reg, value };
 
-	HAL_I2C_Master_Transmit(h_i2c,BME280_I2C_PORT,buf,2,HAL_MAX_DELAY);
+	HAL_I2C_Master_Transmit(h_i2c,BME280_ADDR,buf,2,HAL_MAX_DELAY);
 }
 
 // Read BME280 register
@@ -36,9 +33,9 @@ uint8_t BME280_ReadReg(I2C_HandleTypeDef * h_i2c,uint8_t reg) {
 	uint8_t value = 0; // Initialize value in case of I2C timeout
 
 	// Send register address
-	HAL_I2C_Master_Transmit(h_i2c,BME280_I2C_PORT,&reg,1,HAL_MAX_DELAY);
+	HAL_I2C_Master_Transmit(h_i2c,BME280_ADDR,&reg,1,HAL_MAX_DELAY);
 	// Read register value
-	HAL_I2C_Master_Receive(h_i2c,BME280_I2C_PORT,&value,1,HAL_MAX_DELAY);
+	HAL_I2C_Master_Receive(h_i2c,BME280_ADDR,&value,1,HAL_MAX_DELAY);
 
 	return value;
 }
@@ -188,16 +185,16 @@ BME280_RESULT BME280_Read_Calibration(I2C_HandleTypeDef * h_i2c) {
 
 	// Read pressure and temperature calibration data (calib00..calib23)
 	buf[0] = BME280_REG_CALIB00; // calib00 register address
-	if (HAL_I2C_Master_Transmit(h_i2c,BME280_I2C_PORT,&buf[0],1,HAL_MAX_DELAY) != HAL_OK) return BME280_ERROR;
-	if (HAL_I2C_Master_Receive(h_i2c,BME280_I2C_PORT,(uint8_t *)&cal_param,24,HAL_MAX_DELAY) != HAL_OK) return BME280_ERROR;
+	if (HAL_I2C_Master_Transmit(h_i2c,BME280_ADDR,&buf[0],1,HAL_MAX_DELAY) != HAL_OK) return BME280_ERROR;
+	if (HAL_I2C_Master_Receive(h_i2c,BME280_ADDR,(uint8_t *)&cal_param,24,HAL_MAX_DELAY) != HAL_OK) return BME280_ERROR;
 
 	// Skip one byte (calib24) and read H1 (calib25)
 	cal_param.dig_H1 = BME280_ReadReg(h_i2c,BME280_REG_CALIB25);
 
 	// Read humidity calibration data (calib26..calib41)
 	buf[0] = BME280_REG_CALIB26; // calib26 register address
-	if (HAL_I2C_Master_Transmit(h_i2c,BME280_I2C_PORT,&buf[0],1,HAL_MAX_DELAY) != HAL_OK) return BME280_ERROR;
-	if (HAL_I2C_Master_Receive(h_i2c,BME280_I2C_PORT,buf,7,HAL_MAX_DELAY != HAL_OK)) return BME280_ERROR;
+	if (HAL_I2C_Master_Transmit(h_i2c,BME280_ADDR,&buf[0],1,HAL_MAX_DELAY) != HAL_OK) return BME280_ERROR;
+	if (HAL_I2C_Master_Receive(h_i2c,BME280_ADDR,buf,7,HAL_MAX_DELAY != HAL_OK)) return BME280_ERROR;
 
 	// Unpack data
 	cal_param.dig_H2 = (int16_t)((((int8_t)buf[1]) << 8) | buf[0]);
@@ -223,10 +220,10 @@ BME280_RESULT BME280_Read_UP(I2C_HandleTypeDef * h_i2c,int32_t *UP) {
 
 	// Send 'press_msb' register address
 	buf[0] = BME280_REG_PRESS_MSB;
-	if (HAL_I2C_Master_Transmit(h_i2c,BME280_I2C_PORT,&buf[0],1,HAL_MAX_DELAY) != HAL_OK) return BME280_ERROR;
+	if (HAL_I2C_Master_Transmit(h_i2c,BME280_ADDR,&buf[0],1,HAL_MAX_DELAY) != HAL_OK) return BME280_ERROR;
 
 	// Read the 'press' register (_msb, _lsb, _xlsb)
-	if (HAL_I2C_Master_Receive(h_i2c,BME280_I2C_PORT,&buf[0],3,HAL_MAX_DELAY) == HAL_OK) {
+	if (HAL_I2C_Master_Receive(h_i2c,BME280_ADDR,&buf[0],3,HAL_MAX_DELAY) == HAL_OK) {
 		*UP = (int32_t)((buf[0] << 12) | (buf[1] << 4) | (buf[2] >> 4));
 
 		return BME280_SUCCESS;
@@ -249,10 +246,10 @@ BME280_RESULT BME280_Read_UT(I2C_HandleTypeDef * h_i2c, int32_t *UT) {
 
 	// Send 'temp_msb' register address
 	buf[0] = BME280_REG_TEMP_MSB;
-	if (HAL_I2C_Master_Transmit(h_i2c,BME280_I2C_PORT,&buf[0],1,HAL_MAX_DELAY) != HAL_OK) return BME280_ERROR;
+	if (HAL_I2C_Master_Transmit(h_i2c,BME280_ADDR,&buf[0],1,HAL_MAX_DELAY) != HAL_OK) return BME280_ERROR;
 
 	// Read the 'temp' register (_msb, _lsb, _xlsb)
-	if (HAL_I2C_Master_Receive(h_i2c,BME280_I2C_PORT,&buf[0],3,HAL_MAX_DELAY) == HAL_OK) {
+	if (HAL_I2C_Master_Receive(h_i2c,BME280_ADDR,&buf[0],3,HAL_MAX_DELAY) == HAL_OK) {
 		*UT = (int32_t)((buf[0] << 12) | (buf[1] << 4) | (buf[2] >> 4));
 
 		return BME280_SUCCESS;
@@ -276,10 +273,10 @@ BME280_RESULT BME280_Read_UH(I2C_HandleTypeDef * h_i2c,int32_t *UH) {
 
 	// Send 'hum_msb' register address
 	buf[0] = BME280_REG_HUM_MSB;
-	if (HAL_I2C_Master_Transmit(h_i2c,BME280_I2C_PORT,&buf[0],1,HAL_MAX_DELAY) != HAL_OK) return BME280_ERROR;
+	if (HAL_I2C_Master_Transmit(h_i2c,BME280_ADDR,&buf[0],1,HAL_MAX_DELAY) != HAL_OK) return BME280_ERROR;
 
 	// Read the 'hum' register (_msb, _lsb)
-	if (HAL_I2C_Master_Receive(h_i2c,BME280_I2C_PORT,&buf[0],2,BME280_ADDR) == HAL_OK) {
+	if (HAL_I2C_Master_Receive(h_i2c,BME280_ADDR,&buf[0],2,BME280_ADDR) == HAL_OK) {
 		*UH = (int32_t)((buf[0] << 8) | buf[1]);
 
 		return BME280_SUCCESS;
@@ -306,10 +303,10 @@ BME280_RESULT BME280_Read_UTPH(I2C_HandleTypeDef * h_i2c,int32_t *UT, int32_t *U
 
 	// Send 'press_msb' register address
 	buf[0] = BME280_REG_PRESS_MSB;
-	if (HAL_I2C_Master_Transmit(h_i2c,BME280_I2C_PORT,&buf[0],1,HAL_MAX_DELAY) != HAL_OK) return BME280_ERROR;
+	if (HAL_I2C_Master_Transmit(h_i2c,BME280_ADDR,&buf[0],1,HAL_MAX_DELAY) != HAL_OK) return BME280_ERROR;
 
 	// Read the 'press', 'temp' and 'hum' registers
-	if (HAL_I2C_Master_Receive(h_i2c,BME280_I2C_PORT,&buf[0],8,HAL_MAX_DELAY) == HAL_OK) {
+	if (HAL_I2C_Master_Receive(h_i2c,BME280_ADDR,&buf[0],8,HAL_MAX_DELAY) == HAL_OK) {
 		*UP = (int32_t)((buf[0] << 12) | (buf[1] << 4) | (buf[2] >> 4));
 		*UT = (int32_t)((buf[3] << 12) | (buf[4] << 4) | (buf[5] >> 4));
 		*UH = (int32_t)((buf[6] <<  8) |  buf[7]);
