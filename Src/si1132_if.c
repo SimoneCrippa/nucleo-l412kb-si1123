@@ -21,32 +21,39 @@ HAL_StatusTypeDef Si1132_Reset(I2C_HandleTypeDef * h_i2c)
 	val[0] = Si1132_REG_MEASRATE1;
 	status = HAL_I2C_Master_Transmit(h_i2c,
 			Si1132_DEVICE_ADDR, (uint8_t *) val, 2, HAL_MAX_DELAY);
+	HAL_Delay(SI1132_WAIT_DELAY);
 
 	val[0] = Si1132_REG_IRQEN;
 	status = HAL_I2C_Master_Transmit(h_i2c,
 			Si1132_DEVICE_ADDR, (uint8_t *) val, 2, HAL_MAX_DELAY);
+	HAL_Delay(SI1132_WAIT_DELAY);
 
 	val[0] = Si1132_REG_IRQMODE1;
 	status = HAL_I2C_Master_Transmit(h_i2c,
 			Si1132_DEVICE_ADDR, (uint8_t *) val, 2, HAL_MAX_DELAY);
+	HAL_Delay(SI1132_WAIT_DELAY);
 
 	val[0] = Si1132_REG_IRQMODE2;
 	status = HAL_I2C_Master_Transmit(h_i2c,
 			Si1132_DEVICE_ADDR, (uint8_t *) val, 2, HAL_MAX_DELAY);
+	HAL_Delay(SI1132_WAIT_DELAY);
 
 	val[0] = Si1132_REG_INTCFG;
 	status = HAL_I2C_Master_Transmit(h_i2c,
 			Si1132_DEVICE_ADDR, (uint8_t *) val, 2, HAL_MAX_DELAY);
+	HAL_Delay(SI1132_WAIT_DELAY);
 
 	val[0] = Si1132_REG_IRQSTAT;
 	val[1] = 0xFF;
 	status = HAL_I2C_Master_Transmit(h_i2c,
 			Si1132_DEVICE_ADDR, (uint8_t *) val, 2, HAL_MAX_DELAY);
+	HAL_Delay(SI1132_WAIT_DELAY);
 
-	val[0] = Si1132_RESET;
-	val[1] = 1;
+	val[0] = Si1132_REG_COMMAND;
+	val[1] = Si1132_RESET;
 	status = HAL_I2C_Master_Transmit(h_i2c,
 			Si1132_DEVICE_ADDR, (uint8_t *) val, 2, HAL_MAX_DELAY);
+	HAL_Delay(SI1132_WAIT_DELAY);
 
 	val[0] = Si1132_REG_HWKEY;
 	val[1] = 0x17;
@@ -83,36 +90,46 @@ void Si1132_Init(I2C_HandleTypeDef * h_i2c)
 	Si1132_I2C_writeParam(h_i2c,
 			Si1132_PARAM_CHLIST, Si1132_PARAM_CHLIST_ENUV |
 			Si1132_PARAM_CHLIST_ENALSIR | Si1132_PARAM_CHLIST_ENALSVIS);
+	HAL_Delay(SI1132_WAIT_DELAY);
 
 	val[0] = Si1132_REG_INTCFG;
 	val[1] = Si1132_REG_INTCFG_INTOE;
 	status = HAL_I2C_Master_Transmit(h_i2c,
 				Si1132_DEVICE_ADDR, (uint8_t *) val, 2, HAL_MAX_DELAY);
+	HAL_Delay(SI1132_WAIT_DELAY);
 
 	val[0] = Si1132_REG_IRQEN;
 	val[1] = Si1132_REG_IRQEN_ALSEVERYSAMPLE;
 	status = HAL_I2C_Master_Transmit(h_i2c,
 				Si1132_DEVICE_ADDR, (uint8_t *) val, 2, HAL_MAX_DELAY);
+	HAL_Delay(SI1132_WAIT_DELAY);
 
 	Si1132_I2C_writeParam(h_i2c,
 			Si1132_PARAM_ALSIRADCMUX, Si1132_PARAM_ADCMUX_SMALLIR);
+	HAL_Delay(SI1132_WAIT_DELAY);
 
 	// fastest clocks, clock div 1
 	Si1132_I2C_writeParam(h_i2c, Si1132_PARAM_ALSIRADCGAIN, 0);
+	HAL_Delay(SI1132_WAIT_DELAY);
 	// take 511 clocks to measure
 	Si1132_I2C_writeParam(h_i2c,
 			Si1132_PARAM_ALSIRADCCOUNTER, Si1132_PARAM_ADCCOUNTER_511CLK);
+	HAL_Delay(SI1132_WAIT_DELAY);
 	// in high range mode
 	Si1132_I2C_writeParam(h_i2c,
 			Si1132_PARAM_ALSIRADCMISC, Si1132_PARAM_ALSIRADCMISC_RANGE);
+	HAL_Delay(SI1132_WAIT_DELAY);
 	// fastest clocks
 	Si1132_I2C_writeParam(h_i2c, Si1132_PARAM_ALSVISADCGAIN, 0);
+	HAL_Delay(SI1132_WAIT_DELAY);
 	// take 511 clocks to measure
 	Si1132_I2C_writeParam(h_i2c,
 			Si1132_PARAM_ALSVISADCCOUNTER, Si1132_PARAM_ADCCOUNTER_511CLK);
+	HAL_Delay(SI1132_WAIT_DELAY);
 	//in high range mode (not normal signal)
 	Si1132_I2C_writeParam(h_i2c,
 			Si1132_PARAM_ALSVISADCMISC, Si1132_PARAM_ALSVISADCMISC_VISRANGE);
+	HAL_Delay(SI1132_WAIT_DELAY);
 
 	val[0] = Si1132_REG_MEASRATE0;
 	val[1] = 0xFF;
