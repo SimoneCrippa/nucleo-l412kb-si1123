@@ -109,7 +109,7 @@ int main(void)
 
       /* write values on UART */
 	  char outstr[29];
-	  sprintf(outstr, "%i,%.2f,%.2f,%i.%02u,%u.%02u,%u.%2u\n\r",uv,(visib*0.0079), (ir*0.0079), temperature/100, temperature%100,pressure/100000, (pressure/1000)%100,humidity/1000,(humidity/10)%100);
+	  sprintf(outstr, "%.2f,%.2f,%.2f,%i.%02u,%u.%02u,%u.%2u\n\r",(float)uv/100.0,(visib*0.0079), (ir*0.0079), temperature/100, temperature%100,pressure/100000, (pressure/1000)%100,humidity/1000,(humidity/10)%100);
 	  HAL_UART_Transmit(&huart2, outstr, strlen(outstr), 10);
 
 	  /* fault detection and reset handling */
